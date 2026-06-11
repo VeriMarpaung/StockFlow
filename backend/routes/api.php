@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
@@ -35,4 +36,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::apiResource('products',   ProductController::class);
     Route::apiResource('categories', CategoryController::class);
+
+    Route::get('analytics/insights',          [AnalyticsController::class, 'insights']);
+    Route::post('analytics/insights/regenerate', [AnalyticsController::class, 'regenerate']);
 });
