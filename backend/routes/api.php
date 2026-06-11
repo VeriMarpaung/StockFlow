@@ -4,6 +4,7 @@ use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\StockController;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Route;
@@ -36,6 +37,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::apiResource('products',   ProductController::class);
     Route::apiResource('categories', CategoryController::class);
+
+    Route::post('products/{product}/stock-in',     [StockController::class, 'stockIn']);
+    Route::post('products/{product}/stock-out',    [StockController::class, 'stockOut']);
+    Route::post('products/{product}/adjust-stock', [StockController::class, 'adjustStock']);
+    Route::get('products/{product}/transactions',  [StockController::class, 'transactions']);
 
     Route::get('analytics/insights',          [AnalyticsController::class, 'insights']);
     Route::post('analytics/insights/regenerate', [AnalyticsController::class, 'regenerate']);
