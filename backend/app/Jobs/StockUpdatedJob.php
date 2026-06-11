@@ -7,6 +7,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class StockUpdatedJob implements ShouldQueue
@@ -27,5 +28,11 @@ class StockUpdatedJob implements ShouldQueue
             'type'       => $this->type,
             'quantity'   => $this->quantity,
         ]);
+
+        $product = DB::table('products')->where('id', $this->productId)->first();
+
+        if ($product && $product->stock <= $product->threshold) {
+            LowStockNotificationJob::dispatch($this->productId);
+        }
     }
 }

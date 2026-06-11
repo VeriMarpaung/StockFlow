@@ -3,6 +3,8 @@
 use App\Http\Controllers\AnalyticsController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\StockController;
 use Illuminate\Support\Facades\DB;
@@ -42,6 +44,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('products/{product}/stock-out',    [StockController::class, 'stockOut']);
     Route::post('products/{product}/adjust-stock', [StockController::class, 'adjustStock']);
     Route::get('products/{product}/transactions',  [StockController::class, 'transactions']);
+
+    Route::get('dashboard/summary', [DashboardController::class, 'summary']);
+
+    Route::get('notifications',               [NotificationController::class, 'index']);
+    Route::patch('notifications/{notification}/read', [NotificationController::class, 'markRead']);
 
     Route::get('analytics/insights',          [AnalyticsController::class, 'insights']);
     Route::post('analytics/insights/regenerate', [AnalyticsController::class, 'regenerate']);
