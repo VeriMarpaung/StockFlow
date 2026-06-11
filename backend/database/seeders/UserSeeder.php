@@ -10,18 +10,14 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        User::create([
-            'name'     => 'Admin StockFlow',
-            'email'    => 'admin@stockflow.com',
-            'password' => Hash::make('password'),
-            'role'     => 'admin',
-        ]);
+        User::firstOrCreate(
+            ['email' => 'admin@stockflow.com'],
+            ['name' => 'Admin StockFlow', 'password' => Hash::make('password'), 'role' => 'admin']
+        );
 
-        User::create([
-            'name'     => 'Staff StockFlow',
-            'email'    => 'staff@stockflow.com',
-            'password' => Hash::make('password'),
-            'role'     => 'staff',
-        ]);
+        User::firstOrCreate(
+            ['email' => 'staff@stockflow.com'],
+            ['name' => 'Staff StockFlow', 'password' => Hash::make('password'), 'role' => 'staff']
+        );
     }
 }

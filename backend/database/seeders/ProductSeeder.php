@@ -44,7 +44,7 @@ class ProductSeeder extends Seeder
         ];
 
         foreach ($products as $product) {
-            Product::create(array_merge($product, ['description' => null]));
+            Product::firstOrCreate(['sku' => $product['sku']], array_merge($product, ['description' => null]));
         }
     }
 }

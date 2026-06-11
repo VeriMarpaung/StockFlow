@@ -26,7 +26,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: inaai_backend
-    command: sh -c "chmod -R 777 storage/ bootstrap/cache/ && /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf"
+    command: sh -c "mkdir -p storage/logs storage/framework/cache storage/framework/sessions storage/framework/views && touch storage/logs/laravel.log && chmod -R 777 storage/ bootstrap/cache/ && /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf"
     ports:
       - "8000:8000"
     environment:
@@ -41,7 +41,7 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - QUEUE_CONNECTION=redis
-      - CACHE_DRIVER=redis
+      - CACHE_STORE=redis
       - L5_SWAGGER_GENERATE_ALWAYS=true
       - L5_SWAGGER_CONST_HOST=http://localhost:8000
     depends_on:
@@ -58,7 +58,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: inaai_worker
-    command: sh -c "chmod -R 777 storage/ bootstrap/cache/ && php artisan queue:work --sleep=3 --tries=3 --timeout=60"
+    command: sh -c "mkdir -p storage/logs && touch storage/logs/laravel.log && chmod -R 777 storage/ bootstrap/cache/ && php artisan queue:work --sleep=3 --tries=3 --timeout=60"
     environment:
       - APP_ENV=local
       - APP_KEY=base64:CHANGE_ME_AFTER_SETUP
@@ -71,7 +71,7 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - QUEUE_CONNECTION=redis
-      - CACHE_DRIVER=redis
+      - CACHE_STORE=redis
     depends_on:
       - backend
       - redis
