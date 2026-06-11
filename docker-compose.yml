@@ -1,0 +1,116 @@
+version: '3.9'
+
+services:
+  # ─── Frontend ───────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: inaai_frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000/api
+    depends_on:
+      - backend
+    networks:
+      - inaai_network
+
+  # ─── Backend ────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: inaai_backend
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_ENV=local
+      # - APP_KEY=base64:CHANGE_ME_AFTER_SETUP, disable supaya baca dari backend/.env
+      - DB_CONNECTION=pgsql
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_DATABASE=inaai_db
+      - DB_USERNAME=inaai_user
+      - DB_PASSWORD=inaai_pass
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - QUEUE_CONNECTION=redis
+      - CACHE_DRIVER=redis
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - inaai_network
+
+  # ─── Worker (Queue Consumer) ─────────────────────────────
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: inaai_worker
+    command: php artisan queue:work --sleep=3 --tries=3 --timeout=60
+    environment:
+      - APP_ENV=local
+      - APP_KEY=base64:CHANGE_ME_AFTER_SETUP
+      - DB_CONNECTION=pgsql
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_DATABASE=inaai_db
+      - DB_USERNAME=inaai_user
+      - DB_PASSWORD=inaai_pass
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - QUEUE_CONNECTION=redis
+      - CACHE_DRIVER=redis
+    depends_on:
+      - backend
+      - redis
+    networks:
+      - inaai_network
+
+  # ─── PostgreSQL ──────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: inaai_postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=inaai_db
+      - POSTGRES_USER=inaai_user
+      - POSTGRES_PASSWORD=inaai_pass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U inaai_user -d inaai_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - inaai_network
+
+  # ─── Redis ───────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: inaai_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - inaai_network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  inaai_network:
+    driver: bridge
