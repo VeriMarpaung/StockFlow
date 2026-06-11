@@ -662,8 +662,23 @@ TDD itu Must Have, jadi alur untuk setiap fitur inti adalah:
 Ini bukan opsional lagi. Commit history harus membuktikan test ditulis duluan.
 
 ---
+## 22. ATURAN WORKFLOW WAJIB:
+1. Setelah setiap Work Package selesai, BERHENTI dan jangan lanjut ke WP berikutnya.
+2. Tampilkan ringkasan: apa yang dikerjakan, file yang dibuat/diubah, dan kenapa.
+3. Tampilkan command validasi yang harus dijalankan user.
+4. Tunggu konfirmasi eksplisit dari user ("lanjut ke WP berikutnya") sebelum melanjutkan.
+5. Setiap WP harus punya minimal 2 commit terpisah: test dulu, baru implementasi.
 
-## 22. Hal yang Jangan Dilakukan
+JANGAN auto-lanjut ke WP berikutnya meskipun WP sebelumnya sudah selesai.
+Sebelum menulis kode untuk setiap WP:
+1. Jelaskan dulu dalam 3-5 kalimat: apa yang akan dibuat, mengapa strukturnya begitu,
+   dan SOLID principle mana yang diterapkan.
+2. Setelah penjelasan disetujui, baru tulis kode.
+3. Tulis test file dulu dalam satu commit, baru implementasi dalam commit terpisah.
+
+---
+
+## 23. Hal yang Jangan Dilakukan
 
 - Overengineering terlalu banyak service
 - Membuat AI analytics sebelum Must Have selesai
@@ -677,7 +692,7 @@ Ini bukan opsional lagi. Commit history harus membuktikan test ditulis duluan.
 
 ---
 
-## 23. Jawaban Siap untuk Live Defense
+## 24. Jawaban Siap untuk Live Defense
 
 ### Docker
 > Project terdiri dari 5 container: frontend Next.js, backend Laravel dengan Nginx dan PHP-FPM dikelola Supervisord, worker Laravel Queue, PostgreSQL, dan Redis. Semua dijalankan dengan docker compose up. Ordering Dockerfile didesain agar layer yang jarang berubah di-cache duluan — composer install dilakukan sebelum copy source code sehingga dependency tidak di-install ulang setiap ada perubahan kode.
@@ -699,7 +714,7 @@ Ini bukan opsional lagi. Commit history harus membuktikan test ditulis duluan.
 
 ---
 
-## 24. README Minimal
+## 25. README Minimal
 
 README harus memuat:
 1. Nama project dan deskripsi singkat
@@ -717,7 +732,7 @@ README harus memuat:
 
 ---
 
-## 25. Technical Report (PDF 2-3 hal)
+## 26. Technical Report (PDF 2-3 hal)
 
 Isi yang disarankan:
 1. **Problem & Solution** — masalah inventori, solusi StockFlow
@@ -728,7 +743,7 @@ Isi yang disarankan:
 
 ---
 
-## 26. Fase Pengembangan & Validasi
+## 27. Fase Pengembangan & Validasi
 
 > Ikuti urutan ini. Setiap fase harus divalidasi sebelum lanjut.
 

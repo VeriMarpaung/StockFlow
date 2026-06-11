@@ -28,3 +28,9 @@ Thumbs.db
 
 # Docker / local runtime
 *.pid
+
+#file lokal
+ALUR_PENGERJAAN.md
+Peserta_FullStack.pdf
+Peserta_FullStack.md
+Proposal_Inaai_Fullstack_Veri_Marsil_Marpaung.md
