@@ -13,6 +13,12 @@ class AnalyticsApiTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        Cache::forget('analytics:insights');
+    }
+
     private function fakeLlmSuccess(string $content = 'Insight: Stok Mineral Water kritis.'): void
     {
         Http::fake([

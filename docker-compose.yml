@@ -44,6 +44,9 @@ services:
       - CACHE_STORE=redis
       - L5_SWAGGER_GENERATE_ALWAYS=true
       - L5_SWAGGER_CONST_HOST=http://localhost:8000
+      - AI_API_URL=https://api.maiarouter.ai/v1/chat/completions
+      - AI_API_KEY=sk-oIUuBK2oe8JNS7Eqsfxhgw
+      - AI_MODEL=maia/gemini-3.1-flash-lite-preview
     depends_on:
       postgres:
         condition: service_healthy
