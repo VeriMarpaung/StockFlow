@@ -26,6 +26,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: inaai_backend
+    command: sh -c "chmod -R 777 storage/ bootstrap/cache/ && /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf"
     ports:
       - "8000:8000"
     environment:
@@ -57,7 +58,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: inaai_worker
-    command: php artisan queue:work --sleep=3 --tries=3 --timeout=60
+    command: sh -c "chmod -R 777 storage/ bootstrap/cache/ && php artisan queue:work --sleep=3 --tries=3 --timeout=60"
     environment:
       - APP_ENV=local
       - APP_KEY=base64:CHANGE_ME_AFTER_SETUP
