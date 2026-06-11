@@ -1,0 +1,112 @@
+name: CI — StockFlow
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # ════════════════════════════════════════════════════════════════════════
+  # Job 1: PHP backend tests
+  # Berjalan paralel dengan job frontend-build.
+  # Tidak butuh PostgreSQL/Redis nyata — TestCase.php sudah override ke
+  # SQLite :memory: + cache=array + queue=sync.
+  # ════════════════════════════════════════════════════════════════════════
+  backend-test:
+    name: PHP Tests (SQLite in-memory)
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      # ── 1. Checkout ──────────────────────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ── 2. Setup PHP ─────────────────────────────────────────────────────
+      # PHP 8.2 sesuai "php": "^8.2" di composer.json
+      - name: Setup PHP 8.2
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"
+          extensions: pdo, pdo_sqlite, sqlite3, redis, mbstring, xml, bcmath, zip
+          coverage: none
+
+      # ── 3. Cache Composer dependencies ───────────────────────────────────
+      # Layer jarang berubah (composer.lock stabil) → run berikutnya lebih cepat.
+      # Filosofi sama dengan layer Dockerfile: hal yang jarang berubah di-cache lebih awal.
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: backend/vendor
+          key: composer-${{ hashFiles('backend/composer.lock') }}
+          restore-keys: |
+            composer-
+
+      # ── 4. Install Composer dependencies ─────────────────────────────────
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+
+      # ── 5. Prepare Laravel environment ───────────────────────────────────
+      - name: Prepare .env for CI
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      # ── 6. Run PHPUnit ───────────────────────────────────────────────────
+      - name: Run PHPUnit test suite
+        run: php artisan test --verbose
+
+  # ════════════════════════════════════════════════════════════════════════
+  # Job 2: Next.js TypeScript build check
+  # next build menjalankan tsc (strict mode) + ESLint secara otomatis.
+  # Menangkap type error dan broken import sebelum code masuk ke main.
+  # Tidak butuh backend jalan — ini pure compile-time check.
+  # ════════════════════════════════════════════════════════════════════════
+  frontend-build:
+    name: Frontend Build (TypeScript + ESLint)
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      # ── 1. Checkout ──────────────────────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ── 2. Setup Node.js ─────────────────────────────────────────────────
+      # Node 20 LTS — sesuai @types/node "^20" di package.json
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # ── 3. Cache node_modules ────────────────────────────────────────────
+      - name: Cache npm dependencies
+        uses: actions/cache@v4
+        with:
+          path: frontend/node_modules
+          key: npm-${{ hashFiles('frontend/package-lock.json') }}
+          restore-keys: |
+            npm-
+
+      # ── 4. Install npm dependencies ──────────────────────────────────────
+      # npm ci (bukan npm install) — deterministik dari package-lock.json,
+      # tidak pernah upgrade versi minor secara diam-diam.
+      - name: Install npm dependencies
+        run: npm ci
+
+      # ── 5. next build ────────────────────────────────────────────────────
+      # NEXT_PUBLIC_API_URL wajib ada nilai saat build karena Next.js
+      # menginline NEXT_PUBLIC_* ke bundle di compile time.
+      # Nilai dummy cukup — CI hanya butuh tsc + bundling berhasil,
+      # bukan koneksi API nyata.
+      - name: Build Next.js (tsc + ESLint + bundle)
+        run: npm run build
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:8000/api
