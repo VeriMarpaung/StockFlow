@@ -9,6 +9,24 @@ notifikasi stok rendah, dan AI-driven analytics — dengan fokus pada **race con
 
 ---
 
+## 🚀 Live Demo (Deployed)
+
+| Layanan | URL |
+|---|---|
+| **Frontend (Vercel)** | **https://stock-flow-snowy.vercel.app** |
+| **Backend API (Railway)** | **https://stockflow-production-1e0f.up.railway.app/api** |
+| Health Check | https://stockflow-production-1e0f.up.railway.app/api/health |
+| Swagger API Docs | https://stockflow-production-1e0f.up.railway.app/api/documentation |
+
+**Demo Account:**
+
+| Role | Email | Password |
+|---|---|---|
+| Admin | `admin@stockflow.com` | `password` |
+| Staff | `staff@stockflow.com` | `password` |
+
+---
+
 ## 1. Tech Stack
 
 | Layer | Teknologi | Alasan |
