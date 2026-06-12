@@ -25,9 +25,8 @@ RUN apk add --no-cache \
         autoconf \
         g++ \
         make \
-        curl \
         ca-certificates \
-    && docker-php-ext-install pdo pdo_pgsql bcmath opcache curl \
+    && docker-php-ext-install pdo pdo_pgsql bcmath opcache \
     && pecl install redis \
     && docker-php-ext-enable redis opcache \
     # Hapus build deps setelah PECL selesai
