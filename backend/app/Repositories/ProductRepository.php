@@ -47,4 +47,17 @@ class ProductRepository
     {
         return Product::with('category')->lowStock()->get();
     }
+
+    /**
+     * Invalidate the product catalog cache.
+     *
+     * Called after stock mutations (in/out/adjust) which change stock & version
+     * via raw queries that bypass the Eloquent events this repository relies on
+     * for create/update/delete. Without this, GET /api/products keeps serving a
+     * stale snapshot (old stock & version) for up to CACHE_TTL.
+     */
+    public function flushCache(): void
+    {
+        Cache::forget(self::CACHE_KEY);
+    }
 }

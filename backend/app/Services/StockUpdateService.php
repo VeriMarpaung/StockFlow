@@ -3,14 +3,18 @@
 namespace App\Services;
 
 use App\Jobs\StockUpdatedJob;
+use App\Repositories\ProductRepository;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class StockUpdateService
 {
+    public function __construct(private readonly ProductRepository $products) {}
+
     public function stockIn(int $productId, int $quantity, int $userId, ?string $note = null): array
     {
-        return DB::transaction(function () use ($productId, $quantity, $userId, $note) {
+        $result = DB::transaction(function () use ($productId, $quantity, $userId, $note) {
             $product = DB::table('products')->where('id', $productId)->lockForUpdate()->first();
 
             $stockBefore = $product->stock;
@@ -45,11 +49,15 @@ class StockUpdateService
 
             return ['success' => true, 'stock_before' => $stockBefore, 'stock_after' => $stockAfter];
         });
+
+        $this->invalidateStockCaches();
+
+        return $result;
     }
 
     public function stockOut(int $productId, int $quantity, int $version, int $userId, ?string $note = null): array
     {
-        return DB::transaction(function () use ($productId, $quantity, $version, $userId, $note) {
+        $result = DB::transaction(function () use ($productId, $quantity, $version, $userId, $note) {
             $product = DB::table('products')->where('id', $productId)->first();
 
             if ($product->stock < $quantity) {
@@ -105,11 +113,17 @@ class StockUpdateService
 
             return ['success' => true, 'stock_before' => $stockBefore, 'stock_after' => $stockAfter];
         });
+
+        if ($result['success']) {
+            $this->invalidateStockCaches();
+        }
+
+        return $result;
     }
 
     public function adjustStock(int $productId, int $newQuantity, int $userId, ?string $note = null): array
     {
-        return DB::transaction(function () use ($productId, $newQuantity, $userId, $note) {
+        $result = DB::transaction(function () use ($productId, $newQuantity, $userId, $note) {
             $product = DB::table('products')->where('id', $productId)->lockForUpdate()->first();
 
             $stockBefore = $product->stock;
@@ -144,5 +158,21 @@ class StockUpdateService
 
             return ['success' => true, 'stock_before' => $stockBefore, 'stock_after' => $newQuantity];
         });
+
+        $this->invalidateStockCaches();
+
+        return $result;
+    }
+
+    /**
+     * Invalidate read-caches whose data depends on stock levels, after a
+     * successful mutation. Runs outside the DB transaction so the cache is only
+     * cleared once the new value is committed — preventing a concurrent read
+     * from repopulating the cache with the pre-commit value.
+     */
+    private function invalidateStockCaches(): void
+    {
+        $this->products->flushCache();      // product catalog (stock & version)
+        Cache::forget('dashboard:summary'); // dashboard counts derive from stock
     }
 }
