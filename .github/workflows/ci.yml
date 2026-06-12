@@ -58,7 +58,7 @@ jobs:
 
       # ── 6. Run PHPUnit ───────────────────────────────────────────────────
       - name: Run PHPUnit test suite
-        run: php artisan test --verbose
+        run: php artisan test
 
   # ════════════════════════════════════════════════════════════════════════
   # Job 2: Next.js TypeScript build check
