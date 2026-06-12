@@ -94,6 +94,27 @@ class StockApiTest extends TestCase
         Queue::assertPushed(StockUpdatedJob::class);
     }
 
+    public function test_stock_out_invalidates_product_list_cache(): void
+    {
+        Sanctum::actingAs($this->user);
+
+        // Warm the 'products:all' cache with the pre-mutation snapshot.
+        $this->getJson('/api/products')->assertStatus(200);
+
+        // Mutate stock through the optimistic-locking endpoint.
+        $this->postJson("/api/products/{$this->product->id}/stock-out", [
+            'quantity' => 5,
+            'version'  => 0,
+        ])->assertStatus(200);
+
+        // The cached list must now reflect the new stock & version, not stale data.
+        $listed = collect($this->getJson('/api/products')->json('data'))
+            ->firstWhere('id', $this->product->id);
+
+        $this->assertSame(15, $listed['stock'], 'product list cache was not invalidated after stock-out');
+        $this->assertSame(1, $listed['version'], 'version in cached list is stale after stock-out');
+    }
+
     public function test_stock_out_fails_when_insufficient_stock(): void
     {
         Sanctum::actingAs($this->user);
