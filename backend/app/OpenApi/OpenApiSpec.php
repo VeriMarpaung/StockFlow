@@ -9,6 +9,7 @@ use OpenApi\Attributes as OA;
     version: '1.0.0',
     description: 'Inventory management API with concurrent safety. Optimistic locking on stock-out, Redis queue for async jobs, Redis cache for read-heavy endpoints.'
 )]
+#[OA\Server(url: 'https://stockflow-production-1e0f.up.railway.app', description: 'Production (Railway)')]
 #[OA\Server(url: 'http://localhost:8000', description: 'Local Development')]
 #[OA\SecurityScheme(
     securityScheme: 'sanctum',
