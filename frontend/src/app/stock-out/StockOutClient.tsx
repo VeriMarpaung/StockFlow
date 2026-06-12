@@ -37,7 +37,7 @@ export default function StockOutClient() {
     setSuccess('');
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(''); setSuccess(''); setConflict('');
     if (!selectedProduct) return;
@@ -74,7 +74,7 @@ export default function StockOutClient() {
   return (
     <AppLayout>
       <h1 className="text-xl font-bold text-gray-800 mb-6">Stock Out</h1>
-      <div className="bg-white rounded-lg shadow-sm p-6 max-w-md">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 max-w-md">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Product</label>
@@ -82,7 +82,7 @@ export default function StockOutClient() {
               value={productId}
               onChange={(e) => handleProductChange(e.target.value)}
               required
-              className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+              className="w-full border border-gray-300 rounded px-3 py-2 text-sm text-gray-800"
             >
               <option value="">— Select product —</option>
               {products.map((p) => (
@@ -106,7 +106,7 @@ export default function StockOutClient() {
               min="1"
               max={selectedProduct?.stock}
               required
-              className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+              className="w-full border border-gray-300 rounded px-3 py-2 text-sm text-gray-800"
             />
           </div>
           <div>
@@ -114,21 +114,40 @@ export default function StockOutClient() {
             <input
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+              className="w-full border border-gray-300 rounded px-3 py-2 text-sm text-gray-800"
             />
           </div>
 
           {conflictMsg && (
-            <div className="bg-yellow-50 border border-yellow-300 text-yellow-800 rounded p-3 text-sm">
-              <p className="font-semibold">Conflict Terdeteksi</p>
-              <p className="mt-1">{conflictMsg}</p>
+            <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-3.5 text-sm text-yellow-800">
+              <div className="flex items-start gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 shrink-0 mt-0.5 text-yellow-600">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                </svg>
+                <div>
+                  <p className="font-semibold">Conflict Terdeteksi</p>
+                  <p className="mt-0.5">{conflictMsg}</p>
+                </div>
+              </div>
             </div>
           )}
 
           {success && (
-            <p className="text-green-700 bg-green-50 px-3 py-2 rounded text-sm">{success}</p>
+            <div className="flex items-center gap-2 text-green-700 bg-green-50 border border-green-200 px-3 py-2.5 rounded-lg text-sm">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 shrink-0">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span>{success}</span>
+            </div>
           )}
-          {error && <p className="text-red-600 text-sm">{error}</p>}
+          {error && (
+            <div className="flex items-center gap-2 text-red-600 bg-red-50 border border-red-200 px-3 py-2.5 rounded-lg text-sm">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 shrink-0">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+              </svg>
+              <span>{error}</span>
+            </div>
+          )}
 
           <div className="flex gap-3">
             <button
@@ -151,9 +170,16 @@ export default function StockOutClient() {
         </form>
       </div>
 
-      <div className="mt-6 bg-blue-50 border border-blue-200 rounded p-4 max-w-md text-sm text-blue-800">
-        <p className="font-semibold">Demo Race Condition:</p>
-        <p className="mt-1">Buka halaman ini di 2 tab browser. Pilih produk yang sama, lalu submit stock-out hampir bersamaan. Tab kedua akan mendapat pesan Conflict Terdeteksi.</p>
+      <div className="mt-5 bg-blue-50 border border-blue-200 rounded-xl p-4 max-w-md text-sm text-blue-800">
+        <div className="flex items-start gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 shrink-0 mt-0.5 text-blue-600">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+          </svg>
+          <div>
+            <p className="font-semibold text-blue-900">Demo Race Condition</p>
+            <p className="mt-0.5 text-blue-700">Buka halaman ini di 2 tab browser. Pilih produk yang sama, lalu submit stock-out hampir bersamaan. Tab kedua akan mendapat pesan Conflict Terdeteksi.</p>
+          </div>
+        </div>
       </div>
     </AppLayout>
   );
