@@ -6,19 +6,24 @@ use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 
 abstract class TestCase extends BaseTestCase
 {
-    public function createApplication()
+    /**
+     * docker-compose injects DB_CONNECTION=pgsql, CACHE_STORE=redis, etc. as real
+     * OS env vars. Dotenv's immutable repository (and phpunit.xml's force env) cannot
+     * override an OS-level env var, so config() resolves to the live pgsql/redis.
+     *
+     * Forcing the config here — in refreshApplication(), which setUp() calls *before*
+     * RefreshDatabase migrates — guarantees tests run against an isolated SQLite
+     * in-memory DB + array cache, instead of wiping the real PostgreSQL database and
+     * polluting the real Redis cache on every run.
+     */
+    protected function refreshApplication(): void
     {
-        $app = parent::createApplication();
+        parent::refreshApplication();
 
-        // docker-compose injects DB_CONNECTION=pgsql as a system env var that
-        // Dotenv's ImmutableAdapter cannot override. Override config directly
-        // after app creation so RefreshDatabase targets SQLite in-memory instead
-        // of wiping the real PostgreSQL database on every test run.
-        $app['config']->set('database.default', 'sqlite');
-        $app['config']->set('database.connections.sqlite.database', ':memory:');
-        $app['config']->set('queue.default', 'sync');
-        $app['config']->set('cache.default', 'array');
-
-        return $app;
+        $this->app['config']->set('database.default', 'sqlite');
+        $this->app['config']->set('database.connections.sqlite.database', ':memory:');
+        $this->app['config']->set('cache.default', 'array');
+        $this->app['config']->set('queue.default', 'sync');
+        $this->app['config']->set('session.driver', 'array');
     }
 }
